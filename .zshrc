@@ -1,12 +1,17 @@
-# If you come from bash you might have to change your $PATH.
-# export PATH=$HOME/bin:/usr/local/bin:$PATH
-export PATH=/usr/local/opt/python/libexec/bin:$PATH
+# If you come from bash you might have to change your $PATH.  # export PATH=$HOME/bin:/usr/local/bin:$PATH
+export TERM="xterm-256color"
+
+# Use vi-mode in terminal.
+bindkey -v
+
+bindkey "^[^[[D" backward-word
+bindkey "^[^[[C" forward-word
+export PATH=/usr/local/opt/python/libexec/bin:/usr/local/bin/skaffold:/usr/local/opt/openssl/bin:$PATH
 
 #Go development
 export GOPATH=$HOME/go
 export GOROOT="$(brew --prefix golang)/libexec"
 export PATH="$PATH:${GOPATH}/bin:${GOROOT}/bin"
-
 
 # Path to your oh-my-zsh installation.
 export ZSH="/Users/zachmyndshft/.oh-my-zsh"
@@ -16,11 +21,26 @@ export ZSH="/Users/zachmyndshft/.oh-my-zsh"
 # See https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
 ZSH_THEME="powerlevel9k/powerlevel9k"
 
-DEFAULT_USER=`whoami`
+DEFAULT_USER=$(whoami)
 POWERLEVEL9K_ALWAYS_SHOW_USER=true
 #POWERLEVEL9K_PROMPT_ADD_NEWLINE=true
-POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(virtualenv)
+POWERLEVEL9K_CUSTOM_TERRAFORM_WORKSPACE="tf_prompt"
+POWERLEVEL9K_CUSTOM_TERRAFORM_WORKSPACE_BACKGROUND="blueviolet"
+POWERLEVEL9K_CUSTOM_TERRAFORM_WORKSPACE_FOREGROUND="white"
+#POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(virtualenv vi_mode custom_terraform_workspace)
+POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(dir vcs kubecontext custom_terraform_workspace)
 POWERLEVEL9K_PROMPT_ON_NEWLINE=true
+POWERLEVEL9K_SHORTEN_DIR_LENGTH=3
+
+function tf_prompt() {
+    # dont show 'default' workspace in home dir
+    [[ "$PWD" == ~ ]] && return
+    # check if in terraform dir
+    if [ -d .terraform ]; then
+        workspace=$(terraform workspace show 2>/dev/null) || return
+        echo "🛠 [${workspace}]"
+    fi
+}
 
 # Set list of themes to load
 # Setting this variable when ZSH_THEME=random
@@ -72,7 +92,7 @@ POWERLEVEL9K_PROMPT_ON_NEWLINE=true
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
-zsh-nvm pip python brew  git virtualenv zsh-completions zsh-autosuggestions zsh-syntax-highlighting)
+    zsh-nvm pip python brew git terraform vi-mode virtualenv zsh-completions zsh-autosuggestions zsh-syntax-highlighting)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -104,4 +124,6 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+alias cl="clear"
 
+export PATH=$PATH:/usr/local/kubebuilder/bin
